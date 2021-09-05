@@ -179,6 +179,39 @@ namespace clocks.Functions.Functions
             });
         }
 
+        [FunctionName(nameof(DeleteRecord))]
+        public static async Task<IActionResult> DeleteRecord(
+         [HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "todo/{id}")] HttpRequest req,
+         [Table("todo", "CLOCK", "{id}", Connection = "AzureWebJobsStorage")] TodoEntity todoEntity,
+         [Table("todo", Connection = "AzureWebJobsStorage")] CloudTable todoTable,
+         string id,
+         ILogger log)
+        {
+            log.LogInformation($"Delete record: {id}, received.");
+
+            if (todoEntity == null)
+            {
+                return new BadRequestObjectResult(new Responses
+                {
+                    IsSuccess = false,
+                    Message = "Record not found."
+                });
+            }
+
+            await todoTable.ExecuteAsync(TableOperation.Delete(todoEntity));
+            string message = $"Record: {todoEntity.RowKey}, deleted.";
+            log.LogInformation(message);
+
+
+            return new OkObjectResult(new Responses
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = todoEntity,
+
+            });
+        }
+
 
     }
 }
