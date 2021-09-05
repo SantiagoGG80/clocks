@@ -16,8 +16,8 @@ namespace clocks.Functions.Functions
 {
     public static class TodoApi
     {
-        [FunctionName(nameof(CreateTodo))]
-        public static async Task<IActionResult> CreateTodo(
+        [FunctionName(nameof(CreateRecord))]
+        public static async Task<IActionResult> CreateRecord(
             [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "todo")] HttpRequest req,
             [Table("todo", Connection = "AzureWebJobsStorage")] CloudTable todoTable,
             ILogger log)
@@ -73,5 +73,112 @@ namespace clocks.Functions.Functions
 
             });
         }
+
+        [FunctionName(nameof(UpdateRecord))]
+        public static async Task<IActionResult> UpdateRecord(
+           [HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "todo/{id}")] HttpRequest req,
+           [Table("todo", Connection = "AzureWebJobsStorage")] CloudTable todoTable,
+           string id,
+           ILogger log)
+        {
+            log.LogInformation($"Update for record: {id}, received");
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            Todo todo = JsonConvert.DeserializeObject<Todo>(requestBody);
+
+            // Validate todo id
+            TableOperation findOperation = TableOperation.Retrieve<TodoEntity>("CLOCK", id);
+            TableResult findResult = await todoTable.ExecuteAsync(findOperation);
+            if (findResult.Result == null)
+            {
+                return new BadRequestObjectResult(new Responses
+                {
+                    IsSuccess = false,
+                    Message = "Record not found."
+                });
+            }
+
+            // Update todo
+            TodoEntity todoEntity = (TodoEntity)findResult.Result;
+            todoEntity.Type = todo.Type;
+            todoEntity.Consolidated = todo.Consolidated;
+            if (todo.IdEmployee!=0)
+            {
+                todoEntity.IdEmployee = todo.IdEmployee;                
+            }
+
+            TableOperation addOperation = TableOperation.Replace(todoEntity);
+            await todoTable.ExecuteAsync(addOperation);
+
+            string message = $"Record: {id}, update in table";
+            log.LogInformation(message);
+
+
+            return new OkObjectResult(new Responses
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = todoEntity,
+
+            });
+        }
+
+        [FunctionName(nameof(GetAllRecord))]
+        public static async Task<IActionResult> GetAllRecord(
+           [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "todo")] HttpRequest req,
+           [Table("todo", Connection = "AzureWebJobsStorage")] CloudTable todoTable,
+           ILogger log)
+        {
+            log.LogInformation("get all records received.");
+
+            TableQuery<TodoEntity> query = new TableQuery<TodoEntity>();
+            TableQuerySegment<TodoEntity> todos = await todoTable.ExecuteQuerySegmentedAsync(query, null);
+
+
+            string message = "Retrieved all records.";
+            log.LogInformation(message);
+
+
+            return new OkObjectResult(new Responses
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = todos,
+
+            });
+        }
+
+        [FunctionName(nameof(GetRecordById))]
+        public static IActionResult GetRecordById(
+          [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "todo/{id}")] HttpRequest req,
+          [Table("todo", "CLOCK", "{id}", Connection = "AzureWebJobsStorage")] TodoEntity todoEntity,
+          string id,
+          ILogger log)
+        {
+            log.LogInformation($"get record by id: {id} received");
+
+            if (todoEntity == null)
+            {
+                return new BadRequestObjectResult(new Responses
+                {
+                    IsSuccess = false,
+                    Message = "Record not found."
+                });
+            }
+
+            string message = $"Record: {todoEntity.RowKey}, retrieved.";
+            log.LogInformation(message);
+
+
+            return new OkObjectResult(new Responses
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = todoEntity,
+
+            });
+        }
+
+
     }
 }
