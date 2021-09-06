@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31624.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clocks.Common", "clocks.Common\clocks.Common.csproj", "{A9C32187-1306-455D-87D2-605647E3982A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "clocks.Common", "clocks.Common\clocks.Common.csproj", "{A9C32187-1306-455D-87D2-605647E3982A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clocks.Functions", "clocks.Functions\clocks.Functions.csproj", "{B3A742E8-6D22-4DA5-8ED0-300B40FC811C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "clocks.Functions", "clocks.Functions\clocks.Functions.csproj", "{B3A742E8-6D22-4DA5-8ED0-300B40FC811C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "clocks.Test", "clocks.Test\clocks.Test.csproj", "{492BA20E-5F97-4E65-9384-8737D8B19F92}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "clocks.Test", "clocks.Test\clocks.Test.csproj", "{492BA20E-5F97-4E65-9384-8737D8B19F92}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -49,7 +49,7 @@ namespace clocks.Functions.Functions
 
             TodoEntity todoEntity = new TodoEntity
             {
-                EntryExit = DateTime.UtcNow,
+                EntryExit = todo.EntryExit,
                 ETag = "*",
                 Consolidated = false,
                 PartitionKey = "CLOCK",
@@ -102,9 +102,9 @@ namespace clocks.Functions.Functions
             TodoEntity todoEntity = (TodoEntity)findResult.Result;
             todoEntity.Type = todo.Type;
             todoEntity.Consolidated = todo.Consolidated;
-            if (todo.IdEmployee!=0)
+            if (todo.IdEmployee != 0)
             {
-                todoEntity.IdEmployee = todo.IdEmployee;                
+                todoEntity.IdEmployee = todo.IdEmployee;
             }
 
             TableOperation addOperation = TableOperation.Replace(todoEntity);
@@ -211,6 +211,58 @@ namespace clocks.Functions.Functions
 
             });
         }
+
+        /*[FunctionName(nameof(CreateRecordC))]
+        public static async Task<IActionResult> CreateRecordC(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "time")] HttpRequest req,
+            [Table("todo", Connection = "AzureWebJobsStorage")] CloudTable todoTable,
+            [Table("Consolidated", Connection = "AzureWebJobsStorage")] CloudTable ConsolidatedTable,
+            ILogger log)
+        {
+            log.LogInformation("Recieved a new record.");
+
+
+            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+            Todo todo = JsonConvert.DeserializeObject<Todo>(requestBody);
+
+            if (string.IsNullOrEmpty((todo?.IdEmployee).ToString()))
+            {
+                return new BadRequestObjectResult(new Responses
+                {
+                    IsSuccess = false,
+                    Message = "The employee must have id."
+                });
+            }
+
+
+            TodoEntity todoEntity = new TodoEntity
+            {
+                EntryExit = DateTime.UtcNow,
+                ETag = "*",
+                Consolidated = false,
+                PartitionKey = "CLOCK",
+                RowKey = Guid.NewGuid().ToString(),
+                IdEmployee = todo.IdEmployee,
+                Type = todo.Type
+            };
+
+            TableOperation addOperation = TableOperation.Insert(todoEntity);
+            await todoTable.ExecuteAsync(addOperation);
+
+            string message = "New record stored in table";
+            log.LogInformation(message);
+
+
+            return new OkObjectResult(new Responses
+            {
+                IsSuccess = true,
+                Message = message,
+                Result = todoEntity,
+
+            });
+        }*/
+
+
 
 
     }
